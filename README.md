@@ -1,10 +1,13 @@
-# Final Graphics Engine by James Smith Stuyvesant High School Computer Graphics
+# Final Graphics Engine - James Smith & Jack Cruse Pd. 10 Stuyvesant High School Computer Graphics
 
 ## Things to do
 * OBJ Mesh files
 * implement line/hermite/bezier/circle features
 * Phong Shading
 * Allow users to change drawing and light colors
+
+## Newly Implemented Features:
+* None currently
 
 
 # Syntax
