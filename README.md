@@ -2,7 +2,7 @@
 
 ## Things to do
 * OBJ Mesh files
-* implement line/hermite/bezier/circle features
+* implement hermite/bezier/circle features
 * Phong Shading
 * Allow users to change drawing and light colors
 
@@ -37,7 +37,7 @@
 * x0 y0 z0 = top left corner of the box
 * h w d = height width and depth
 
-`line x0 y0 z0 x1 y1 z1` - creates a line **NOT IMPLEMENTED**
+`line x0 y0 z0 x1 y1 z1` - creates a line
 * x0 y0 z0 = start point
 * x1 y1 z1 = end point
 
