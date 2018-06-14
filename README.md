@@ -3,6 +3,8 @@
 ## Newly Implemented Features:
 * OBJ Mesh files - Works with n-vertice faces(not restricted to any amount of vertices for a face)
 
+** Must extract .obj files from objs.zip to root of repository to use script
+
 ![Gif Missing](https://media.giphy.com/media/RMhbkSi5EOHrhDMbI5/giphy.gif)
 
 # Syntax
