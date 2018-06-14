@@ -4,7 +4,7 @@ LDFLAGS= -lm
 CC= gcc
 
 run: all
-	./mdl simple_anim.mdl
+	./mdl my_script.mdl
 
 all: parser
 

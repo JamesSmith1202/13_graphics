@@ -3,16 +3,9 @@
 #include <unistd.h>
 
 /*========== my_main.c ==========
-
-  This is the only file you need to modify in order
-  to get a working mdl project (for now).
-
   my_main.c will serve as the interpreter for mdl.
   When an mdl script goes through a lexer and parser,
   the resulting operations will be in the array op[].
-
-  Your job is to go through each entry in op and perform
-  the required action from the list below:
 
   push: push a new origin matrix onto the origin stack
   pop: remove the top matrix on the origin stack
@@ -103,17 +96,7 @@ void first_pass() {
 /*======== struct vary_node ** second_pass() ==========
   Inputs:
   Returns: An array of vary_node linked lists
-
-  In order to set the knobs for animation, we need to keep
-  a seaprate value for each knob for each frame. We can do
-  this by using an array of linked lists. Each array index
-  will correspond to a frame (eg. knobs[0] would be the first
-  frame, knobs[2] would be the 3rd frame and so on).
-
-  Each index should contain a linked list of vary_nodes, each
-  node contains a knob name, a value, and a pointer to the
-  next node.
-
+  
   Go through the opcode array, and when you find vary, go
   from knobs[0] to knobs[frames-1] and add (or modify) the
   vary_node corresponding to the given knob with the
@@ -177,16 +160,6 @@ void print_knobs() {
   provided basename plus a numeric string such that the
   files will be listed in order, then clear the screen and
   reset any other data structures that need it.
-
-  Important note: you cannot just name your files in
-  regular sequence, like pic0, pic1, pic2, pic3... if that
-  is done, then pic1, pic10, pic11... will come before pic2
-  and so on. In order to keep things clear, add leading 0s
-  to the numeric portion of the name. If you use sprintf,
-  you can use "%0xd" for this purpose. It will add at most
-  x 0s in front of a number, if needed, so if used correctly,
-  and x = 4, you would get numbers like 0001, 0002, 0011,
-  0487
   ====================*/
 void my_main() {
 
@@ -264,6 +237,13 @@ void my_main() {
     for (i=0;i<lastop;i++) {
       switch (op[i].opcode)
         {
+        case MESH:
+          add_mesh(tmp, op[i].op.mesh.name);
+          matrix_mult(peek(systems), tmp);
+          draw_polygons(tmp, t, zb, view, light, ambient,
+                        areflect, dreflect, sreflect);
+          tmp->lastcol = 0;
+          break;
         case SPHERE:
           add_sphere(tmp, op[i].op.sphere.d[0],
                     op[i].op.sphere.d[1],

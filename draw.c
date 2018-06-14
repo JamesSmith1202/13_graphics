@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <unistd.h>
 
 #include "ml6.h"
 #include "display.h"
@@ -11,12 +12,57 @@
 
 /*======== void scanline_convert() ==========
   Inputs: struct matrix *points
+          char * name
+  Returns:
+
+  Parses .obj file and inputs vectors into polygon matrix
+  ====================*/
+void add_mesh(struct matrix * points, char * name){
+  if( access( name, F_OK|R_OK) == -1) {//if the file doesn't exist, doesnt have read permissions, or isnt .obj
+    printf("Error: Mesh file doesn't exist or does not have read permissions\n");
+    exit(0);
+  }
+  if(strstr(name, ".obj") == NULL){
+    printf("Error: Mesh file isn't a .obj file\n");
+    exit(0);
+  }
+  FILE *f = fopen(name, "r");
+  struct matrix * vert = new_matrix(4, 100);//vertex matrix
+  char line[256];
+  double x, y, z;
+  int vertices[4];
+
+  add_point(vert, 0, 0, 0);//adding point for index 0 because obj is indexed starting at 1
+  while(fgets(line, sizeof(line), f) != NULL){//while the file hasnt been read through entirely
+    line[strlen(line)-1]='\0';
+    if(line[0] == 'v' && line[1] == ' '){//if it is a vertex
+      sscanf(line, "v %lf %lf %lf", &x, &y, &z);
+      add_point(vert, x, y, z);//add the point to the vertex matrix
+    }
+    if(line[0] == 'f'){//if this is a polygon declaration
+      sscanf(line, "f %d %d %d %d", vertices, vertices+1, vertices+2, vertices+3);
+      add_polygon(points, vert->m[0][vertices[0]], vert->m[1][vertices[0]], vert->m[2][vertices[0]], //add the polygon composed of the vertices
+                            vert->m[0][vertices[1]], vert->m[1][vertices[1]], vert->m[2][vertices[1]],
+                            vert->m[0][vertices[2]], vert->m[1][vertices[2]], vert->m[2][vertices[2]]);
+      if(vertices[3] != NULL){//if there is a 4th vertex provided, add it
+        add_polygon(points, vert->m[0][vertices[0]], vert->m[1][vertices[0]], vert->m[2][vertices[0]],
+                            vert->m[0][vertices[2]], vert->m[1][vertices[2]], vert->m[2][vertices[2]],
+                            vert->m[0][vertices[3]], vert->m[1][vertices[3]], vert->m[2][vertices[3]]);
+      }
+    }
+  }
+  fclose(f);
+  free_matrix(vert);
+}
+
+/*======== void scanline_convert() ==========
+  Inputs: struct matrix *points
           int i
           screen s
           zbuffer zb
   Returns:
 
-  Fills in polygon i by drawing consecutive horizontal (or vertical) lines.
+  Fills in polygon i by drawing consecutive horizontal lines.
 
   Color should be set differently for each polygon.
   ====================*/
@@ -72,8 +118,6 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb, color
       top = i;
     }
   }//end y2 bottom
-  //printf("ybot: %0.2f, ymid: %0.2f, ytop: %0.2f\n", (points->m[1][bot]),(points->m[1][mid]), (points->m[1][top]));
-  /* printf("bot: (%0.2f, %0.2f, %0.2f) mid: (%0.2f, %0.2f, %0.2f) top: (%0.2f, %0.2f, %0.2f)\n", */
 
   x0 = points->m[0][bot];
   x1 = points->m[0][bot];
@@ -85,14 +129,12 @@ void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb, color
   distance1 = (int)(points->m[1][mid]) - y;
   distance2 = (int)(points->m[1][top]) - (int)(points->m[1][mid]);
 
-  //printf("distance0: %d distance1: %d distance2: %d\n", distance0, distance1, distance2);
   dx0 = distance0 > 0 ? (points->m[0][top]-points->m[0][bot])/distance0 : 0;
   dx1 = distance1 > 0 ? (points->m[0][mid]-points->m[0][bot])/distance1 : 0;
   dz0 = distance0 > 0 ? (points->m[2][top]-points->m[2][bot])/distance0 : 0;
   dz1 = distance1 > 0 ? (points->m[2][mid]-points->m[2][bot])/distance1 : 0;
 
   while ( y <= (int)points->m[1][top] ) {
-    //printf("\tx0: %0.2f x1: %0.2f y: %d\n", x0, x1, y);
     draw_line(x0, y, z0, x1, y, z1, s, zb, c);
 
     x0+= dx0;
@@ -252,7 +294,7 @@ void add_box( struct matrix * polygons,
   adds all the points for a sphere with center
   (cx, cy, cz) and radius r.
 
-  should call generate_sphere to create the
+  calls generate_sphere to create the
   necessary points
   ====================*/
 void add_sphere( struct matrix * edges,
@@ -337,10 +379,6 @@ struct matrix * generate_sphere(double cx, double cy, double cz,
         cos(2*M_PI * rot) + cy;
       z = r * sin(M_PI * circ) *
         sin(2*M_PI * rot) + cz;
-
-      /* printf("rotation: %d\tcircle: %d\n", rotation, circle); */
-      /* printf("rot: %lf\tcirc: %lf\n", rot, circ); */
-      /* printf("sphere point: (%0.2f, %0.2f, %0.2f)\n\n", x, y, z); */
       add_point(points, x, y, z);
     }
   }
@@ -361,7 +399,7 @@ struct matrix * generate_sphere(double cx, double cy, double cz,
   adds all the points required to make a torus
   with center (cx, cy, cz) and radii r1 and r2.
 
-  should call generate_torus to create the
+  calls generate_torus to create the
   necessary points
   ====================*/
 void add_torus( struct matrix * edges,
@@ -377,8 +415,6 @@ void add_torus( struct matrix * edges,
   longStart = 0;
   longStop = step;
 
-  //printf("points: %d\n", points->lastcol);
-
   for ( lat = latStart; lat < latStop; lat++ ) {
     for ( longt = longStart; longt < longStop; longt++ ) {
       p0 = lat * step + longt;
@@ -389,7 +425,6 @@ void add_torus( struct matrix * edges,
       p2 = (p1 + step) % (step * step);
       p3 = (p0 + step) % (step * step);
 
-      //printf("p0: %d\tp1: %d\tp2: %d\tp3: %d\n", p0, p1, p2, p3);
       add_polygon( edges, points->m[0][p0],
                    points->m[1][p0],
                    points->m[2][p0],
@@ -447,9 +482,6 @@ struct matrix * generate_torus( double cx, double cy, double cz,
       y = r1 * sin(2*M_PI * circ) + cy;
       z = -1*sin(2*M_PI * rot) *
         (r1 * cos(2*M_PI * circ) + r2) + cz;
-
-      //printf("rotation: %d\tcircle: %d\n", rotation, circle);
-      //printf("torus point: (%0.2f, %0.2f, %0.2f)\n", x, y, z);
       add_point(points, x, y, z);
     }
   }
@@ -519,10 +551,6 @@ void add_curve( struct matrix *edges,
   xcoefs = generate_curve_coefs(x0, x1, x2, x3, type);
   ycoefs = generate_curve_coefs(y0, y1, y2, y3, type);
 
-  /* print_matrix(xcoefs); */
-  /* printf("\n"); */
-  /* print_matrix(ycoefs); */
-
   for (i=1; i<=step; i++) {
 
     t = (double)i/step;
@@ -548,7 +576,7 @@ void add_curve( struct matrix *edges,
   int z
   Returns:
   adds point (x, y, z) to points and increment points.lastcol
-  if points is full, should call grow on points
+  if points is full, calls grow on points
   ====================*/
 void add_point( struct matrix * points, double x, double y, double z) {
 
@@ -567,7 +595,6 @@ void add_point( struct matrix * points, double x, double y, double z) {
   int x0, int y0, int z0, int x1, int y1, int z1
   Returns:
   add the line connecting (x0, y0, z0) to (x1, y1, z1) to points
-  should use add_point
   ====================*/
 void add_edge( struct matrix * points,
                double x0, double y0, double z0,
@@ -680,7 +707,6 @@ void draw_line(int x0, int y0, double z0,
 
   z = z0;
   dz = (z1 - z0) / distance;
-  //printf("\t(%d, %d) -> (%d, %d)\tdistance: %0.2f\tdz: %0.2f\tz: %0.2f\n", x0, y0, x1, y1, distance, dz, z);
 
   while ( loop_start < loop_end ) {
 
