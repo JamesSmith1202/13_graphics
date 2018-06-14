@@ -3,6 +3,7 @@
 ## Newly Implemented Features:
 * OBJ Mesh files - Works with n-vertice faces(not restricted to any amount of vertices for a face)
 
+![Gif Missing](https://media.giphy.com/media/RMhbkSi5EOHrhDMbI5/giphy.gif)
 
 # Syntax
 
