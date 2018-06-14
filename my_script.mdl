@@ -1,12 +1,45 @@
+//Have fun...it takes like 30 minutes
 frames 100
-basename spin
+basename characters
 push
-move 250 250 0
-scale 15 15 15
+move -3000 0 0 panRight
 rotate y 30
-rotate y 360 yeet
-rotate x 360 yeet
-rotate z 360 yeet
 push
-mesh shuttle.obj
-vary yeet 0 99 0 1
+scale 3 3 3
+mesh lady.obj
+pop
+push
+move 500 0 0
+push
+move 250 0 0
+scale 2 2 2
+mesh IronMan.obj
+pop
+push
+move 500 0 0
+push
+move 250 350 0
+scale 60 60 60
+mesh Male.obj
+pop
+push
+move 500 0 0
+push
+move 100 100 0
+scale .7 .7 .7
+mesh plane.obj
+pop
+push
+move 500 0 0
+push
+move 250 0 0
+scale 2 2 2
+mesh Bench_HighRes.obj
+pop
+push
+move 500 0 0
+push
+move 250 100 0
+scale 12 12 12
+mesh headphones.obj
+vary panRight 0 99 0 1

@@ -121,10 +121,10 @@ void add_mesh(struct matrix * points, char * name){
                               vert->m[0][vert1], vert->m[1][vert1], vert->m[2][vert1],
                               vert->m[0][vert2], vert->m[1][vert2], vert->m[2][vert2]);
       }
-      for(i=0; i< size; i++){//free the args matrix
-        free(args[i]);
-      }
-      free(args);
+      // for(i=0; i< size; i++){//free the args matrix
+      //   free(args[i]);
+      // }
+      // free(args);
     }
   }
   fclose(f);
