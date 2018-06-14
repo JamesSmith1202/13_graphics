@@ -7,7 +7,11 @@
 
 void scanline_convert( struct matrix *points, int i, screen s, zbuffer zb, color c );
 
+int split (const char *str, char c, char ***arr);
+
 void add_mesh(struct matrix * points, char * name);
+
+void print_args(char ** args, int len);
 
 //polygon organization
 void add_polygon( struct matrix * points,

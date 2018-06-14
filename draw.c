@@ -10,6 +10,77 @@
 #include "math.h"
 #include "gmath.h"
 
+
+int split (const char *str, char c, char ***arr)
+{
+    int count = 1;
+    int token_len = 1;
+    int i = 0;
+    char *p;
+    char *t;
+
+    p = (char *)str;
+    while (*p != '\0')
+    {
+        if (*p == c)
+            count++;
+        p++;
+    }
+
+    *arr = (char**) malloc(sizeof(char*) * count);
+    if (*arr == NULL)
+        exit(1);
+
+    p = (char *)str;
+    while (*p != '\0')
+    {
+        if (*p == c)
+        {
+            (*arr)[i] = (char*) malloc( sizeof(char) * token_len );
+            if ((*arr)[i] == NULL)
+                exit(1);
+
+            token_len = 0;
+            i++;
+        }
+        p++;
+        token_len++;
+    }
+    (*arr)[i] = (char*) malloc( sizeof(char) * token_len );
+    if ((*arr)[i] == NULL)
+        exit(1);
+
+    i = 0;
+    p = (char *)str;
+    t = ((*arr)[i]);
+    while (*p != '\0')
+    {
+        if (*p != c && *p != '\0')
+        {
+            *t = *p;
+            t++;
+        }
+        else
+        {
+            *t = '\0';
+            i++;
+            t = ((*arr)[i]);
+        }
+        p++;
+    }
+
+    return count;
+}
+
+void print_args(char ** args, int len){
+  int i;
+  printf("%d : [", len);
+  for(i=0; i < len; i++){
+    printf("%s ", args[i]);
+  }
+  printf("]\n");
+}
+
 /*======== void scanline_convert() ==========
   Inputs: struct matrix *points
           char * name
@@ -30,7 +101,8 @@ void add_mesh(struct matrix * points, char * name){
   struct matrix * vert = new_matrix(4, 100);//vertex matrix
   char line[256];
   double x, y, z;
-  int vertices[4];
+  char ** args;
+  int i, size, vert0, vert1, vert2;
 
   add_point(vert, 0, 0, 0);//adding point for index 0 because obj is indexed starting at 1
   while(fgets(line, sizeof(line), f) != NULL){//while the file hasnt been read through entirely
@@ -40,15 +112,19 @@ void add_mesh(struct matrix * points, char * name){
       add_point(vert, x, y, z);//add the point to the vertex matrix
     }
     if(line[0] == 'f'){//if this is a polygon declaration
-      sscanf(line, "f %d %d %d %d", vertices, vertices+1, vertices+2, vertices+3);
-      add_polygon(points, vert->m[0][vertices[0]], vert->m[1][vertices[0]], vert->m[2][vertices[0]], //add the polygon composed of the vertices
-                            vert->m[0][vertices[1]], vert->m[1][vertices[1]], vert->m[2][vertices[1]],
-                            vert->m[0][vertices[2]], vert->m[1][vertices[2]], vert->m[2][vertices[2]]);
-      if(vertices[3] != NULL){//if there is a 4th vertex provided, add it
-        add_polygon(points, vert->m[0][vertices[0]], vert->m[1][vertices[0]], vert->m[2][vertices[0]],
-                            vert->m[0][vertices[2]], vert->m[1][vertices[2]], vert->m[2][vertices[2]],
-                            vert->m[0][vertices[3]], vert->m[1][vertices[3]], vert->m[2][vertices[3]]);
+      size = split(line, ' ', &args);
+      vert0 = atoi(args[1]);
+      for(i=2; i < size-1; i++){//start at 2 to avoid 'f' and first arg
+        vert1 = atoi(args[i]);
+        vert2 = atoi(args[i+1]);
+        add_polygon(points, vert->m[0][vert0], vert->m[1][vert0], vert->m[2][vert0], //add the polygon composed of the vertices
+                              vert->m[0][vert1], vert->m[1][vert1], vert->m[2][vert1],
+                              vert->m[0][vert2], vert->m[1][vert2], vert->m[2][vert2]);
       }
+      for(i=0; i< size; i++){//free the args matrix
+        free(args[i]);
+      }
+      free(args);
     }
   }
   fclose(f);
@@ -210,28 +286,6 @@ void draw_polygons(struct matrix *polygons, screen s, zbuffer zb,
       color c = get_lighting(normal, view, ambient, light, areflect, dreflect, sreflect);
 
       scanline_convert(polygons, point, s, zb, c);
-
-      draw_line( polygons->m[0][point],
-                 polygons->m[1][point],
-                 polygons->m[2][point],
-                 polygons->m[0][point+1],
-                 polygons->m[1][point+1],
-                 polygons->m[2][point+1],
-                 s, zb, c);
-      draw_line( polygons->m[0][point+2],
-                 polygons->m[1][point+2],
-                 polygons->m[2][point+2],
-                 polygons->m[0][point+1],
-                 polygons->m[1][point+1],
-                 polygons->m[2][point+1],
-                 s, zb, c);
-      draw_line( polygons->m[0][point],
-                 polygons->m[1][point],
-                 polygons->m[2][point],
-                 polygons->m[0][point+2],
-                 polygons->m[1][point+2],
-                 polygons->m[2][point+2],
-                 s, zb, c);
     }
   }
 }
