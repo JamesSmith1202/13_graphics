@@ -5,7 +5,7 @@
 * Allow users to change drawing and light colors
 
 ## Newly Implemented Features:
-* OBJ Mesh files
+* OBJ Mesh files - Works with n-vertice faces(not restricted to any amount of vertices for a face)
 
 
 # Syntax
@@ -39,7 +39,7 @@
 * x0 y0 z0 = start point
 * x1 y1 z1 = end point
 
-`mesh filename` - load a mesh or set of edges from an obj file into the pointlist and or edge list directly
+`mesh filename` - load a mesh or set of edges from an obj file into the pointlist and or edge list directly(**OBJ format must have single space separations**)
 
 ## Knobs/Animation
 `basename name` - sets the base filename to save the gif and its generated images under.
