@@ -1,4 +1,4 @@
-# Final Graphics Engine - James Smith & Jack Cruse Pd. 10 Stuyvesant High School Computer Graphics
+# Final Graphics Engine - James Smith Pd. 10 Stuyvesant High School Computer Graphics
 
 ## Newly Implemented Features:
 * OBJ Mesh files - Works with n-vertice faces(not restricted to any amount of vertices for a face)
